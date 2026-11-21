@@ -114,6 +114,7 @@ class NewsApp extends StatelessWidget {
         theme: ThemeData(
           colorSchemeSeed: green,
           useMaterial3: true,
+          fontFamily: 'HindSiliguri',
           textTheme: GoogleFonts.hindSiliguriTextTheme(),
           scaffoldBackgroundColor: const Color(0xFFF4F4F4),
         ),
@@ -121,6 +122,7 @@ class NewsApp extends StatelessWidget {
           colorSchemeSeed: green,
           brightness: Brightness.dark,
           useMaterial3: true,
+          fontFamily: 'HindSiliguri',
           textTheme: GoogleFonts.hindSiliguriTextTheme(),
           scaffoldBackgroundColor: Colors.black,
         ),
