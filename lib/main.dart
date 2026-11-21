@@ -1,5 +1,4 @@
 import 'package:share_plus/share_plus.dart';
-import 'package:share_plus/share_plus.dart';
 import 'extra.dart';
 import 'home.dart';
 import 'dart:convert';
@@ -439,7 +438,7 @@ class DetailPage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text('বিস্তারিত'),
-          actions: [IconButton(icon: const Icon(Icons.share), onPressed: () => SharePlus.instance.share(ShareParams(text: '${post.title}\n${post.link}', title: ${post.title}))),IconButton(icon: const Icon(Icons.share), onPressed: () => SharePlus.instance.share(ShareParams(text: '${post.title}\n${post.link}', title: ${post.title}))),
+          actions: [IconButton(icon: const Icon(Icons.share), onPressed: () => SharePlus.instance.share(ShareParams(text: '${post.title}\n${post.link}', title: post.title))),
             ValueListenableBuilder<List<Post>>(
               valueListenable: Favs.list,
               builder: (_, __, ___) => IconButton(
