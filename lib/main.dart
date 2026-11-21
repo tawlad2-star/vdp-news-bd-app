@@ -126,10 +126,7 @@ PreferredSizeWidget topBar(String? title) => AppBar(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(24))),
       title: title != null
           ? Text(title, style: const TextStyle(fontWeight: FontWeight.bold))
-          : Text.rich(const TextSpan(children: [
-              TextSpan(text: 'VDP ', style: TextStyle(color: Color(0xFFE02020))),
-              TextSpan(text: 'News BD', style: TextStyle(color: green)),
-            ], style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900))),
+          : Image.asset('assets/logo.png', height: 40),
     );
 
 Widget drawerCat(BuildContext context, String label) => ListTile(
@@ -182,10 +179,7 @@ class _ShellState extends State<Shell> {
             Container(
               color: Colors.white,
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
-              child: const Text.rich(TextSpan(children: [
-                TextSpan(text: 'VDP ', style: TextStyle(color: Color(0xFFE02020))),
-                TextSpan(text: 'News BD', style: TextStyle(color: green)),
-              ], style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900))),
+              child: Image.asset('assets/logo.png', height: 60),
             ),
             Container(
               color: Colors.black,
