@@ -241,8 +241,6 @@ class _ShellState extends State<Shell> {
         ),
       );
 }
-EOF>>
-cat >> lib/main.dart << 'EOF'
 
 class FeedView extends StatefulWidget {
   final String? label;
