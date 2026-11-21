@@ -1,3 +1,136 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const blog = 'https://vdpnewsbd.blogspot.com';
+const green = Color(0xFF00A651);
+const cats = ['Ansar VDP News', 'AVUB News', 'Head Quarter News', 'VDP News'];
+
+String bn(Object n) => n.toString().split('').map((c) {
+      final i = '0123456789'.indexOf(c);
+      return i < 0 ? c : '০১২৩৪৫৬৭৮৯'[i];
+    }).join();
+
+String ago(DateTime d) {
+  final x = DateTime.now().difference(d);
+  if (x.inMinutes < 1) return 'এইমাত্র';
+  if (x.inMinutes < 60) return '${bn(x.inMinutes)} মিনিট আগে';
+  if (x.inHours < 24) return '${bn(x.inHours)} ঘণ্টা আগে';
+  return '${bn(x.inDays)} দিন আগে';
+}
+
+class Post {
+  final String title, html, link, cat;
+  final DateTime date;
+  Post(this.title, this.html, this.link, this.cat, this.date);
+
+  factory Post.fromFeed(Map e) {
+    final links = e['link'] as List;
+    final alt = links.firstWhere((l) => l['rel'] == 'alternate', orElse: () => links.first);
+    final cl = (e['category'] ?? []) as List;
+    final term = cl.map((c) => c['term'] as String).firstWhere(cats.contains, orElse: () => '');
+    return Post(
+      e['title']['\$t'],
+      (e['content']?['\$t'] ?? e['summary']?['\$t'] ?? '') as String,
+      alt['href'],
+      term,
+      DateTime.parse(e['published']['\$t']),
+    );
+  }
+
+  factory Post.fromJson(Map m) =>
+      Post(m['t'], m['h'], m['l'], m['c'], DateTime.parse(m['d']));
+  Map toJson() => {'t': title, 'h': html, 'l': link, 'c': cat, 'd': date.toIso8601String()};
+
+  String get catName => cat.isEmpty ? 'News' : cat;
+  List<String> get images =>
+      RegExp(r'<img[^>]+src="([^"]+)"').allMatches(html).map((m) => m.group(1)!).toList();
+  String? get image => images.isEmpty ? null : images.first;
+
+  String get text => html
+      .replaceAll(RegExp(r'<br\s*/?>|</p>|</div>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'<[^>]*>'), '')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'")
+      .replaceAll(RegExp(r'\n\s*\n+'), '\n\n')
+      .trim();
+}
+
+Future<List<Post>> fetchPosts([String? label]) async {
+  final path = label == null
+      ? '/feeds/posts/default'
+      : '/feeds/posts/default/-/${Uri.encodeComponent(label)}';
+  final r = await http.get(Uri.parse('$blog$path?alt=json&max-results=40'));
+  final j = jsonDecode(utf8.decode(r.bodyBytes));
+  final entries = (j['feed']['entry'] ?? []) as List;
+  return entries.map((e) => Post.fromFeed(e as Map)).toList();
+}
+
+class Favs {
+  static final list = ValueNotifier<List<Post>>([]);
+  static Future<void> load() async {
+    final p = await SharedPreferences.getInstance();
+    final s = p.getString('favs');
+    if (s != null) {
+      list.value = (jsonDecode(s) as List).map((e) => Post.fromJson(e as Map)).toList();
+    }
+  }
+
+  static bool has(Post p) => list.value.any((x) => x.link == p.link);
+  static Future<void> toggle(Post p) async {
+    final l = [...list.value];
+    if (has(p)) {
+      l.removeWhere((x) => x.link == p.link);
+    } else {
+      l.insert(0, p);
+    }
+    list.value = l;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('favs', jsonEncode(l.map((e) => e.toJson()).toList()));
+  }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Favs.load();
+  runApp(const NewsApp());
+}
+
+class NewsApp extends StatelessWidget {
+  const NewsApp({super.key});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'VDP News BD',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: green,
+          useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFFF4F4F4),
+        ),
+        home: const Shell(),
+      );
+}
+
+PreferredSizeWidget topBar(String? title) => AppBar(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      elevation: 3,
+      centerTitle: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24))),
+      title: title != null
+          ? Text(title, style: const TextStyle(fontWeight: FontWeight.bold))
+          : Text.rich(const TextSpan(children: [
+              TextSpan(text: 'VDP ', style: TextStyle(color: Color(0xFFE02020))),
+              TextSpan(text: 'News BD', style: TextStyle(color: green)),
+            ], style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900))),
+    );
 
 Widget drawerCat(BuildContext context, String label) => ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 22),
