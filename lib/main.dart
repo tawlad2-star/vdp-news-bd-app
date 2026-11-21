@@ -1,3 +1,5 @@
+import 'extra.dart';
+import 'home.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -113,13 +115,22 @@ class NewsApp extends StatelessWidget {
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFFF4F4F4),
         ),
+        darkTheme: ThemeData(
+          colorSchemeSeed: green,
+          brightness: Brightness.dark,
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.black,
+        ),
+        themeMode: ThemeMode.system,
         home: const Shell(),
       );
 }
 
-PreferredSizeWidget topBar(String? title) => AppBar(
+PreferredSizeWidget topBar(String? title, {List<Widget>? actions}) => AppBar(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
+      foregroundColor: Colors.black,
+      actions: actions,
       elevation: 3,
       centerTitle: true,
       shape: const RoundedRectangleBorder(
@@ -171,7 +182,13 @@ class _ShellState extends State<Shell> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: topBar(null),
+        appBar: topBar(null, actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const SearchPage())),
+          ),
+        ]),
         drawer: Drawer(
           backgroundColor: const Color(0xFF2B2B2B),
           shape: const RoundedRectangleBorder(),
@@ -219,17 +236,20 @@ class _ShellState extends State<Shell> {
           ]),
         ),
         body: IndexedStack(index: tab, children: const [
-          FeedView(hero: true),
+          HomeView(),
           FeedView(hero: false),
+          NewsFeedView(),
+          CategoryGrid(),
           FavView(),
         ]),
         bottomNavigationBar: NavigationBar(
-          backgroundColor: Colors.white,
           selectedIndex: tab,
           onDestinationSelected: (i) => setState(() => tab = i),
           destinations: const [
             NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'হোম'),
             NavigationDestination(icon: Icon(Icons.access_time), selectedIcon: Icon(Icons.access_time_filled), label: 'সর্বশেষ'),
+            NavigationDestination(icon: Icon(Icons.rss_feed), label: 'নিউজফিড'),
+            NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view), label: 'বিভাগ'),
             NavigationDestination(icon: Icon(Icons.bookmark_border), selectedIcon: Icon(Icons.bookmark), label: 'ফেভারিট'),
           ],
         ),
@@ -305,11 +325,11 @@ class TimeRow extends StatelessWidget {
   const TimeRow(this.post, {super.key});
   @override
   Widget build(BuildContext context) => Row(children: [
-        const Icon(Icons.access_time_filled, size: 20, color: Color(0xFF333A4A)),
+        Icon(Icons.access_time_filled, size: 20, color: Theme.of(context).hintColor),
         const SizedBox(width: 6),
         Expanded(
             child: Text(ago(post.date),
-                style: const TextStyle(color: Colors.black54), overflow: TextOverflow.ellipsis)),
+                style: TextStyle(color: Theme.of(context).hintColor), overflow: TextOverflow.ellipsis)),
         CatChip(post.catName),
       ]);
 }
@@ -329,7 +349,6 @@ class HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
         clipBehavior: Clip.antiAlias,
-        color: Colors.white,
         margin: const EdgeInsets.only(bottom: 10),
         child: InkWell(
           onTap: () => openPost(context, post),
@@ -371,7 +390,6 @@ class NewsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
         clipBehavior: Clip.antiAlias,
-        color: Colors.white,
         margin: const EdgeInsets.only(bottom: 10),
         child: InkWell(
           onTap: () => openPost(context, post),
