@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'extra.dart';
 import 'home.dart';
 import 'dart:convert';
@@ -115,7 +114,6 @@ class NewsApp extends StatelessWidget {
           colorSchemeSeed: green,
           useMaterial3: true,
           fontFamily: 'HindSiliguri',
-          textTheme: GoogleFonts.hindSiliguriTextTheme(),
           scaffoldBackgroundColor: const Color(0xFFF4F4F4),
         ),
         darkTheme: ThemeData(
@@ -123,7 +121,6 @@ class NewsApp extends StatelessWidget {
           brightness: Brightness.dark,
           useMaterial3: true,
           fontFamily: 'HindSiliguri',
-          textTheme: GoogleFonts.hindSiliguriTextTheme(),
           scaffoldBackgroundColor: Colors.black,
         ),
         themeMode: ThemeMode.system,
